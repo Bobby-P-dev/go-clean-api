@@ -1,0 +1,10 @@
+basePath: /api/v1
+host: localhost:8080
+info:
+  contact: {}
+  description: This is a sample server for a Go application following Clean Architecture
+    principles.
+  title: Go Clean Architecture API
+  version: "1.0"
+paths: {}
+swagger: "2.0"
