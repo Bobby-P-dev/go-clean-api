@@ -1,4 +1,29 @@
 basePath: /api/v1
+definitions:
+  user.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      username:
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  user.UserResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      username:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -6,5 +31,32 @@ info:
     principles.
   title: Go Clean Architecture API
   version: "1.0"
-paths: {}
+paths:
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with the provided information
+      parameters:
+      - description: User Info
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create a new user
+      tags:
+      - Users
 swagger: "2.0"

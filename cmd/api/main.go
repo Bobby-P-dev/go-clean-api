@@ -7,11 +7,10 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 
 	_ "github.com/Bobby-P-dev/go-clean-api.git/docs"
+	"github.com/Bobby-P-dev/go-clean-api.git/internal/user"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -24,12 +23,15 @@ func main() {
 
 	api := r.Group("/api/v1")
 	{
-		api.GET("/health", func(c *gin.Context) {
-			c.JSON(http.StatusOK, gin.H{
-				"sucsses": true,
-				"message": "API is running",
-			})
-		})
+		// api.GET("/health", func(c *gin.Context) {
+		// 	c.JSON(http.StatusOK, gin.H{
+		// 		"sucsses": true,
+		// 		"message": "API is running",
+		// 	})
+		// })
+
+		userHandler := user.NewHandler()
+		api.POST("/users", userHandler.CreateUser)
 	}
 	r.Run(":8080")
 }
