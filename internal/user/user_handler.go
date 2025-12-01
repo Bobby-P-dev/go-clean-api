@@ -8,10 +8,11 @@ import (
 )
 
 type Handler struct {
+	service *Service
 }
 
 func NewHandler() *Handler {
-	return &Handler{}
+	return &Handler{service: NewService()}
 }
 
 // CreateUser godoc
@@ -33,7 +34,7 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	}
 
 	user := UserResponse{
-		ID:       "1",
+		ID:       1,
 		Username: req.Username,
 		Email:    req.Email,
 	}
@@ -42,5 +43,37 @@ func (h *Handler) CreateUser(c *gin.Context) {
 		"success": true,
 		"message": "user created",
 		"data":    user,
+	})
+}
+
+// ListUsers godoc
+// @Summary List users with pagination
+// @Description Retrieve a paginated list of users
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param page query int false "Page number"
+// @Param limit query int false "Number of users per page"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /users [get]
+func (h *Handler) ListUsers(c *gin.Context) {
+	var q PaginationQuery
+	if err := c.ShouldBindQuery(&q); err != nil {
+		response.Error(c, http.StatusBadRequest, "invalid query parameters")
+		return
+	}
+
+	users, total := h.service.ListUsers(q.Page, q.Limit)
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "users retrieved",
+		"data":    users,
+		"meta": gin.H{
+			"page":  q.Page,
+			"limit": q.Limit,
+			"total": total,
+		},
 	})
 }

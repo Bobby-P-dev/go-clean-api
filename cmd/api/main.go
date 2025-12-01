@@ -32,6 +32,7 @@ func main() {
 
 		userHandler := user.NewHandler()
 		api.POST("/users", userHandler.CreateUser)
+		api.GET("/users", userHandler.ListUsers)
 	}
 	r.Run(":8080")
 }
