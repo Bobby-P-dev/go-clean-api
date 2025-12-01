@@ -7,9 +7,12 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 
 	_ "github.com/Bobby-P-dev/go-clean-api.git/docs"
+	"github.com/Bobby-P-dev/go-clean-api.git/internal/config"
 	"github.com/Bobby-P-dev/go-clean-api.git/internal/user"
 
 	swaggerFiles "github.com/swaggo/files"
@@ -17,6 +20,20 @@ import (
 )
 
 func main() {
+
+	cfg := config.LoadConfig()
+	db := config.InitDB(cfg)
+
+	sqlDB, _ := db.DB()
+	if err := sqlDB.Ping(); err != nil {
+		panic("failed to connect database: " + err.Error())
+	}
+	fmt.Println("Database connected successfully")
+
+	userRepo := user.NewRepository(db)
+	userService := user.NewService(userRepo)
+	userHandler := user.NewHandler(userService)
+
 	r := gin.Default()
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -29,10 +46,9 @@ func main() {
 		// 		"message": "API is running",
 		// 	})
 		// })
-
-		userHandler := user.NewHandler()
 		api.POST("/users", userHandler.CreateUser)
 		api.GET("/users", userHandler.ListUsers)
 	}
+
 	r.Run(":8080")
 }

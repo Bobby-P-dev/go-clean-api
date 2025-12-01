@@ -1,38 +1,47 @@
 package user
 
+import "context"
+
 type Service struct {
+	repository Repository
 }
 
-func NewService() *Service {
-	return &Service{}
+func NewService(repository Repository) *Service {
+	return &Service{repository: repository}
 }
 
-func (s *Service) ListUsers(page, limit int) ([]UserResponse, int) {
-	users := []UserResponse{
-		{ID: 1, Username: "user1", Email: "user1@example.com"},
-		{ID: 2, Username: "user2", Email: "user2@example.com"},
-		{ID: 3, Username: "user3", Email: "user3@example.com"},
-		{ID: 4, Username: "user4", Email: "user4@example.com"},
-		{ID: 5, Username: "user5", Email: "user5@example.com"},
+func (s *Service) CreateUser(ctx context.Context, r CreateUserRequest) (*UserResponse, error) {
+	user := &User{
+		Username: r.Username,
+		Email:    r.Email,
+		Password: r.Password,
 	}
 
-	total := len(users)
-	if limit <= 0 {
-		limit = 10
-	}
-	if page <= 0 {
-		page = 1
+	if err := s.repository.CreateUser(ctx, user); err != nil {
+		return nil, err
 	}
 
-	start := (page - 1) * limit
-	if start > total {
-		return []UserResponse{}, total
+	return &UserResponse{
+		ID:       user.ID,
+		Username: user.Username,
+		Email:    user.Email,
+	}, nil
+}
+
+func (s *Service) ListUsers(ctx context.Context, page, limit int) ([]*UserResponse, int64, error) {
+	users, total, err := s.repository.ListUsers(ctx, page, limit)
+	if err != nil {
+		return nil, 0, err
 	}
 
-	end := start + limit
-	if end > total {
-		end = total
+	var userResponses []*UserResponse
+	for _, user := range users {
+		userResponses = append(userResponses, &UserResponse{
+			ID:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+		})
 	}
 
-	return users[start:end], total
+	return userResponses, total, nil
 }
