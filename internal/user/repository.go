@@ -8,6 +8,7 @@ import (
 type Repository interface {
 	CreateUser(ctx context.Context, user *User) error
 	ListUsers(ctx context.Context, page, limit int) ([]*User, int64, error)
+	LoginUser(ctx context.Context, email string) (*User, error)
 }
 
 type GormRepository struct {
@@ -46,4 +47,12 @@ func (r *GormRepository) ListUsers(ctx context.Context, page, limit int) ([]*Use
 		return nil, 0, err
 	}
 	return users, total, nil
+}
+
+func (r *GormRepository) LoginUser(ctx context.Context, email string) (*User, error) {
+	var user User
+	if err := r.db.WithContext(ctx).Where("email = ?", email).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
 }

@@ -12,6 +12,16 @@ type UserResponse struct {
 	Email    string `json:"email"`
 }
 
+type Jwt struct {
+	Token string `json:"token"`
+}
+
+type UserResponseLogin struct {
+	Sucsses bool   `json:"success"`
+	Message string `json:"message"`
+	Jwt     Jwt    `json:"jwt"`
+}
+
 type PaginationQuery struct {
 	Page  int `form:"page,default=1"`
 	Limit int `form:"Limit,default=1"`
@@ -28,4 +38,9 @@ type PaginationMeta struct {
 	Page  int `json:"page"`
 	Limit int `json:"limit"`
 	Total int `json:"total"`
+}
+
+type LoginRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
 }

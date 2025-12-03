@@ -1,6 +1,12 @@
 package user
 
-import "context"
+import (
+	"context"
+	"errors"
+	"github.com/Bobby-P-dev/go-clean-api.git/pkg/bcrypt"
+	"github.com/golang-jwt/jwt/v5"
+	"time"
+)
 
 type Service struct {
 	repository Repository
@@ -11,10 +17,16 @@ func NewService(repository Repository) *Service {
 }
 
 func (s *Service) CreateUser(ctx context.Context, r CreateUserRequest) (*UserResponse, error) {
+
+	pwd, err := bcrypt.HashPwd(r.Password)
+	if err != nil {
+		return nil, err
+	}
+
 	user := &User{
 		Username: r.Username,
 		Email:    r.Email,
-		Password: r.Password,
+		Password: pwd,
 	}
 
 	if err := s.repository.CreateUser(ctx, user); err != nil {
@@ -44,4 +56,46 @@ func (s *Service) ListUsers(ctx context.Context, page, limit int) ([]*UserRespon
 	}
 
 	return userResponses, total, nil
+}
+
+func (s *Service) LoginUser(ctx context.Context, email, password string) (*UserResponseLogin, error) {
+
+	user := &User{
+		Email:    email,
+		Password: password,
+	}
+
+	user, err := s.repository.LoginUser(ctx, email)
+	if err != nil {
+		return nil, err
+	}
+
+	match := bcrypt.CheckPwdHash(password, user.Password)
+
+	if !match {
+		return nil, errors.New("invalid password")
+	}
+
+	claims := jwt.MapClaims{
+		"user_id":  user.ID,
+		"username": user.Username,
+		"email":    user.Email,
+		"exp":      jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	key := []byte("secret")
+
+	tokenString, err := token.SignedString(key)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &UserResponseLogin{
+		Sucsses: true,
+		Message: "login successful yeah",
+		Jwt:     Jwt{Token: tokenString},
+	}
+	return res, nil
 }

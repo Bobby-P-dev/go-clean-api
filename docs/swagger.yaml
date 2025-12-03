@@ -15,6 +15,11 @@ definitions:
     - password
     - username
     type: object
+  user.Jwt:
+    properties:
+      token:
+        type: string
+    type: object
   user.UserResponse:
     properties:
       email:
@@ -23,6 +28,15 @@ definitions:
         type: integer
       username:
         type: string
+    type: object
+  user.UserResponseLogin:
+    properties:
+      jwt:
+        $ref: '#/definitions/user.Jwt'
+      message:
+        type: string
+      success:
+        type: boolean
     type: object
 host: localhost:8080
 info:
@@ -86,6 +100,35 @@ paths:
             additionalProperties: true
             type: object
       summary: Create a new user
+      tags:
+      - Users
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user and return a JWT token
+      parameters:
+      - description: User Credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.UserResponseLogin'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Login a user
       tags:
       - Users
 swagger: "2.0"

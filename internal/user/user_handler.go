@@ -40,11 +40,7 @@ func (h *Handler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"success": true,
-		"message": "user created",
-		"data":    user,
-	})
+	response.Success(c, "user created successfully", user)
 }
 
 // ListUsers godoc
@@ -83,4 +79,38 @@ func (h *Handler) ListUsers(c *gin.Context) {
 			"total": total,
 		},
 	})
+}
+
+// LoginUser godoc
+// @Summary Login a user
+// @Description Authenticate a user and return a JWT token
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param credentials body map[string]string true "User Credentials"
+// @Success 200 {object} UserResponseLogin
+// @Failure 401 {object} map[string]interface{}
+// @Router /users/login [post]
+func (h *Handler) LoginUser(c *gin.Context) {
+	ctx := c.Request.Context()
+
+	var req LoginRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Error(c, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	loginResp, err := h.service.LoginUser(ctx, req.Email, req.Password)
+	if err != nil {
+		response.Error(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	if loginResp == nil {
+		response.Error(c, http.StatusUnauthorized, "invalid email or password")
+		return
+	}
+
+	response.Success(c, "login successful", loginResp)
 }

@@ -30,6 +30,10 @@ func main() {
 	}
 	fmt.Println("Database connected successfully")
 
+	if err := db.AutoMigrate(&user.User{}); err != nil {
+		panic("failed to migrate database: " + err.Error())
+	}
+
 	userRepo := user.NewRepository(db)
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService)
@@ -48,6 +52,7 @@ func main() {
 		// })
 		api.POST("/users", userHandler.CreateUser)
 		api.GET("/users", userHandler.ListUsers)
+		api.POST("/login", userHandler.LoginUser)
 	}
 
 	r.Run(":8080")
