@@ -2,7 +2,7 @@ package user
 
 import (
 	"context"
-	"github.com/Bobby-P-dev/go-clean-api.git/pkg/customerr"
+	"github.com/Bobby-P-dev/go-clean-api/pkg/customerr"
 	"gorm.io/gorm"
 	"strings"
 )

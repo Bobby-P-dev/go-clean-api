@@ -14,9 +14,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	_ "github.com/Bobby-P-dev/go-clean-api.git/docs"
-	"github.com/Bobby-P-dev/go-clean-api.git/internal/config"
-	"github.com/Bobby-P-dev/go-clean-api.git/internal/user"
+	_ "github.com/Bobby-P-dev/go-clean-api/docs"
+	"github.com/Bobby-P-dev/go-clean-api/internal/config"
+	"github.com/Bobby-P-dev/go-clean-api/internal/user"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"

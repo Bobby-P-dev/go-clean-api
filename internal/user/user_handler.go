@@ -2,11 +2,11 @@ package user
 
 import (
 	"errors"
-	"github.com/Bobby-P-dev/go-clean-api.git/pkg/customerr"
-	validator2 "github.com/Bobby-P-dev/go-clean-api.git/pkg/validator"
+	"github.com/Bobby-P-dev/go-clean-api/pkg/customerr"
+	validator2 "github.com/Bobby-P-dev/go-clean-api/pkg/validator"
 	"net/http"
 
-	"github.com/Bobby-P-dev/go-clean-api.git/pkg/response"
+	"github.com/Bobby-P-dev/go-clean-api/pkg/response"
 	"github.com/gin-gonic/gin"
 )
 
@@ -123,14 +123,5 @@ func (h *Handler) LoginUser(c *gin.Context) {
 		return
 	}
 
-	//if loginResp == nil {
-	//	switch {
-	//	case errors.Is(err, customerr.ErrUnauthorized):
-	//		response.Error(c, http.StatusUnauthorized, "invalid email or password", nil)
-	//	default:
-	//		response.Error(c, http.StatusInternalServerError, err.Error(), nil)
-	//	}
-	//	return
-	//}
 	response.Success(c, "login successful", loginResp)
 }

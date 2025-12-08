@@ -2,8 +2,8 @@ package user
 
 import (
 	"context"
-	"github.com/Bobby-P-dev/go-clean-api.git/pkg/bcrypt"
-	"github.com/Bobby-P-dev/go-clean-api.git/pkg/customerr"
+	"github.com/Bobby-P-dev/go-clean-api/pkg/bcrypt"
+	"github.com/Bobby-P-dev/go-clean-api/pkg/customerr"
 	"github.com/golang-jwt/jwt/v5"
 	"os"
 	"time"
@@ -84,6 +84,10 @@ func (s *Service) LoginUser(ctx context.Context, email, password string) (*UserR
 
 	secret := os.Getenv("JWT_KEY")
 
+	if secret == "" {
+		return nil, customerr.ErrInternal
+	}
+
 	key := []byte(secret)
 	tokenString, err := token.SignedString(key)
 	if err != nil {
@@ -91,7 +95,7 @@ func (s *Service) LoginUser(ctx context.Context, email, password string) (*UserR
 	}
 
 	res := &UserResponseLogin{
-		Sucsses: true,
+		Success: true,
 		Message: "login successful yeah",
 		Jwt:     Jwt{Token: tokenString},
 	}

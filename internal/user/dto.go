@@ -17,18 +17,18 @@ type Jwt struct {
 }
 
 type UserResponseLogin struct {
-	Sucsses bool   `json:"success"`
+	Success bool   `json:"success"`
 	Message string `json:"message"`
 	Jwt     Jwt    `json:"jwt"`
 }
 
 type PaginationQuery struct {
 	Page  int `form:"page,default=1"`
-	Limit int `form:"Limit,default=1"`
+	Limit int `form:"limit,default=1"`
 }
 
 type ListUsersResponse struct {
-	Sucsses bool           `json:"success"`
+	Success bool           `json:"success"`
 	Message string         `json:"message"`
 	Data    []UserResponse `json:"data"`
 	Meta    PaginationMeta `json:"meta"`

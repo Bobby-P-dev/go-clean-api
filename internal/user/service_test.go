@@ -2,8 +2,8 @@ package user
 
 import (
 	"context"
-	"github.com/Bobby-P-dev/go-clean-api.git/pkg/bcrypt"
-	"github.com/Bobby-P-dev/go-clean-api.git/pkg/customerr"
+	"github.com/Bobby-P-dev/go-clean-api/pkg/bcrypt"
+	"github.com/Bobby-P-dev/go-clean-api/pkg/customerr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"os"

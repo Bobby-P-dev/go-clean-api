@@ -1,4 +1,4 @@
-module github.com/Bobby-P-dev/go-clean-api.git
+module github.com/Bobby-P-dev/go-clean-api
 
 go 1.24.0
 
