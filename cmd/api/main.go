@@ -8,6 +8,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/joho/godotenv"
+	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 
@@ -21,6 +24,10 @@ import (
 
 func main() {
 
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("No .env file found, using environment variables")
+	}
 	cfg := config.LoadConfig()
 	db := config.InitDB(cfg)
 
@@ -55,5 +62,7 @@ func main() {
 		api.POST("/login", userHandler.LoginUser)
 	}
 
-	r.Run(":8080")
+	if err := r.Run(os.Getenv("APP_PORT")); err != nil {
+		log.Fatalf("Failed to run server: %v", err)
+	}
 }

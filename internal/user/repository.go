@@ -2,7 +2,9 @@ package user
 
 import (
 	"context"
+	"github.com/Bobby-P-dev/go-clean-api.git/pkg/customerr"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type Repository interface {
@@ -21,7 +23,15 @@ func NewRepository(db *gorm.DB) *GormRepository {
 
 func (r *GormRepository) CreateUser(ctx context.Context, user *User) error {
 
-	return r.db.WithContext(ctx).Create(user).Error
+	err := r.db.WithContext(ctx).Create(user).Error
+
+	if err != nil {
+		if strings.Contains(strings.ToLower(err.Error()), "duplicate") {
+			return customerr.ErrConflict
+		}
+		return err
+	}
+	return nil
 }
 
 func (r *GormRepository) ListUsers(ctx context.Context, page, limit int) ([]*User, int64, error) {
@@ -31,7 +41,7 @@ func (r *GormRepository) ListUsers(ctx context.Context, page, limit int) ([]*Use
 	q := r.db.WithContext(ctx).Model(&User{})
 
 	if err := q.Count(&total).Error; err != nil {
-		return nil, 0, err
+		return nil, 0, customerr.ErrInternal
 	}
 
 	if limit <= 0 {
@@ -44,14 +54,20 @@ func (r *GormRepository) ListUsers(ctx context.Context, page, limit int) ([]*Use
 	offset := (page - 1) * limit
 
 	if err := q.Limit(limit).Offset(offset).Find(&users).Error; err != nil {
-		return nil, 0, err
+		return nil, 0, customerr.ErrInternal
 	}
 	return users, total, nil
 }
 
 func (r *GormRepository) LoginUser(ctx context.Context, email string) (*User, error) {
+
 	var user User
-	if err := r.db.WithContext(ctx).Where("email = ?", email).First(&user).Error; err != nil {
+	err := r.db.WithContext(ctx).Where("email = ?", email).First(&user).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, customerr.ErrNotFound
+		}
 		return nil, err
 	}
 	return &user, nil

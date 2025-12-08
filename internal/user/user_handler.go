@@ -1,6 +1,9 @@
 package user
 
 import (
+	"errors"
+	"github.com/Bobby-P-dev/go-clean-api.git/pkg/customerr"
+	validator2 "github.com/Bobby-P-dev/go-clean-api.git/pkg/validator"
 	"net/http"
 
 	"github.com/Bobby-P-dev/go-clean-api.git/pkg/response"
@@ -30,17 +33,22 @@ func (h *Handler) CreateUser(c *gin.Context) {
 	ctx := c.Request.Context()
 	var req CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, http.StatusBadRequest, "invalid request body")
+		valErrors := validator2.FormatValidationError(err)
+		response.Error(c, http.StatusBadRequest, "invalid request body", valErrors)
 		return
 	}
 
 	user, err := h.service.CreateUser(ctx, req)
 	if err != nil {
-		response.Error(c, http.StatusBadRequest, err.Error())
+		switch {
+		case errors.Is(err, customerr.ErrConflict):
+			response.Error(c, http.StatusConflict, err.Error(), nil)
+		default:
+			response.Error(c, http.StatusInternalServerError, err.Error(), nil)
+		}
 		return
 	}
-
-	response.Success(c, "user created successfully", user)
+	response.Created(c, "user created successfully", user)
 }
 
 // ListUsers godoc
@@ -59,26 +67,28 @@ func (h *Handler) ListUsers(c *gin.Context) {
 
 	var q PaginationQuery
 	if err := c.ShouldBindQuery(&q); err != nil {
-		response.Error(c, http.StatusBadRequest, "invalid query parameters")
+		valErrors := validator2.FormatValidationError(err)
+		response.Error(c, http.StatusBadRequest, "invalid query parameters", valErrors)
 		return
 	}
 
 	users, total, err := h.service.ListUsers(ctx, q.Page, q.Limit)
 	if err != nil {
-		response.Error(c, http.StatusBadRequest, err.Error())
+		switch {
+		case errors.Is(err, customerr.ErrInternal):
+			response.Error(c, http.StatusInternalServerError, err.Error(), nil)
+		default:
+			response.Error(c, http.StatusInternalServerError, err.Error(), nil)
+		}
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"message": "users retrieved",
-		"data":    users,
-		"meta": gin.H{
-			"page":  q.Page,
-			"limit": q.Limit,
-			"total": total,
-		},
-	})
+	meta := &PaginationMeta{
+		Page:  q.Page,
+		Limit: q.Limit,
+		Total: int(total),
+	}
+	response.SuccsesMeta(c, "Successfully retrieved users", users, meta)
 }
 
 // LoginUser godoc
@@ -97,20 +107,30 @@ func (h *Handler) LoginUser(c *gin.Context) {
 	var req LoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.Error(c, http.StatusBadRequest, "invalid request body")
+		valErrors := validator2.FormatValidationError(err)
+		response.Error(c, http.StatusBadRequest, "invalid request body", valErrors)
 		return
 	}
 
 	loginResp, err := h.service.LoginUser(ctx, req.Email, req.Password)
 	if err != nil {
-		response.Error(c, http.StatusUnauthorized, err.Error())
+		switch {
+		case errors.Is(err, customerr.ErrUnauthorized):
+			response.Error(c, http.StatusUnauthorized, "invalid email or password", nil)
+		default:
+			response.Error(c, http.StatusInternalServerError, err.Error(), nil)
+		}
 		return
 	}
 
-	if loginResp == nil {
-		response.Error(c, http.StatusUnauthorized, "invalid email or password")
-		return
-	}
-
+	//if loginResp == nil {
+	//	switch {
+	//	case errors.Is(err, customerr.ErrUnauthorized):
+	//		response.Error(c, http.StatusUnauthorized, "invalid email or password", nil)
+	//	default:
+	//		response.Error(c, http.StatusInternalServerError, err.Error(), nil)
+	//	}
+	//	return
+	//}
 	response.Success(c, "login successful", loginResp)
 }

@@ -2,9 +2,10 @@ package user
 
 import (
 	"context"
-	"errors"
 	"github.com/Bobby-P-dev/go-clean-api.git/pkg/bcrypt"
+	"github.com/Bobby-P-dev/go-clean-api.git/pkg/customerr"
 	"github.com/golang-jwt/jwt/v5"
+	"os"
 	"time"
 )
 
@@ -41,6 +42,7 @@ func (s *Service) CreateUser(ctx context.Context, r CreateUserRequest) (*UserRes
 }
 
 func (s *Service) ListUsers(ctx context.Context, page, limit int) ([]*UserResponse, int64, error) {
+
 	users, total, err := s.repository.ListUsers(ctx, page, limit)
 	if err != nil {
 		return nil, 0, err
@@ -60,11 +62,6 @@ func (s *Service) ListUsers(ctx context.Context, page, limit int) ([]*UserRespon
 
 func (s *Service) LoginUser(ctx context.Context, email, password string) (*UserResponseLogin, error) {
 
-	user := &User{
-		Email:    email,
-		Password: password,
-	}
-
 	user, err := s.repository.LoginUser(ctx, email)
 	if err != nil {
 		return nil, err
@@ -73,20 +70,21 @@ func (s *Service) LoginUser(ctx context.Context, email, password string) (*UserR
 	match := bcrypt.CheckPwdHash(password, user.Password)
 
 	if !match {
-		return nil, errors.New("invalid password")
+		return nil, customerr.ErrUnauthorized
 	}
 
 	claims := jwt.MapClaims{
 		"user_id":  user.ID,
 		"username": user.Username,
 		"email":    user.Email,
-		"exp":      jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+		"exp":      jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	key := []byte("secret")
+	secret := os.Getenv("JWT_KEY")
 
+	key := []byte(secret)
 	tokenString, err := token.SignedString(key)
 	if err != nil {
 		return nil, err
