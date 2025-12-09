@@ -62,7 +62,7 @@ func main() {
 	protected := r.Group("/protected/api/v1")
 	protected.Use(user.AuthMiddleware())
 	{
-		protected.GET("/user", userHandler.GetMe)
+		protected.GET("/me", userHandler.GetMe)
 	}
 	if err := r.Run(os.Getenv("APP_PORT")); err != nil {
 		log.Fatalf("Failed to run server: %v", err)
