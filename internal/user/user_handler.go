@@ -125,3 +125,42 @@ func (h *Handler) LoginUser(c *gin.Context) {
 
 	response.Success(c, "login successful", loginResp)
 }
+
+// GetMe godoc
+// @Summary Get current user claims
+// @Description Retrieve the claims of the currently authenticated user
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Security BearerAuth
+// @Success 200 {object} map[string]interface{}
+// @Failure 401 {object} map[string]interface{}
+// @Router /users/me [get]
+func (h *Handler) GetMe(c *gin.Context) {
+
+	rawID, okID := c.Get("user_id")
+	username, okUser := c.Get("username")
+	email, okEmail := c.Get("email")
+	exp, okExp := c.Get("exp")
+
+	if !okID || !okUser || !okEmail || !okExp {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "User session not found"})
+		return
+	}
+
+	var userID float64
+	if val, ok := rawID.(float64); ok {
+		userID = val
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Berhasil ambil semua data claim",
+		"data": gin.H{
+			"user_id":    uint(userID),
+			"username":   username.(string),
+			"email":      email.(string),
+			"expired_at": exp.(float64),
+		},
+	})
+}

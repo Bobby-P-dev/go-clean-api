@@ -2,6 +2,9 @@
 // @version 1.0
 // @description This is a sample server for a Go application following Clean Architecture principles.
 // @host localhost:8080
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 // @BasePath /api/v1
 
 package main
@@ -51,17 +54,16 @@ func main() {
 
 	api := r.Group("/api/v1")
 	{
-		// api.GET("/health", func(c *gin.Context) {
-		// 	c.JSON(http.StatusOK, gin.H{
-		// 		"sucsses": true,
-		// 		"message": "API is running",
-		// 	})
-		// })
 		api.POST("/users", userHandler.CreateUser)
 		api.GET("/users", userHandler.ListUsers)
 		api.POST("/login", userHandler.LoginUser)
 	}
 
+	protected := r.Group("/protected/api/v1")
+	protected.Use(user.AuthMiddleware())
+	{
+		protected.GET("/user", userHandler.GetMe)
+	}
 	if err := r.Run(os.Getenv("APP_PORT")); err != nil {
 		log.Fatalf("Failed to run server: %v", err)
 	}

@@ -1,4 +1,3 @@
-basePath: /api/v1
 definitions:
   user.CreateUserRequest:
     properties:
@@ -131,4 +130,32 @@ paths:
       summary: Login a user
       tags:
       - Users
+  /users/me:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the claims of the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get current user claims
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

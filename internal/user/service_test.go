@@ -124,7 +124,7 @@ func TestLoginUser_Success(t *testing.T) {
 	// assertions
 	assert.NoError(t, err)
 	assert.NotNil(t, res)
-	assert.True(t, res.Sucsses)
+	assert.True(t, res.Success)
 	assert.Equal(t, "login successful yeah", res.Message)
 	assert.NotEmpty(t, res.Jwt.Token)
 
