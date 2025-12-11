@@ -11,6 +11,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/Bobby-P-dev/go-clean-api/internal/article"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -40,7 +41,7 @@ func main() {
 	}
 	fmt.Println("Database connected successfully")
 
-	if err := db.AutoMigrate(&user.User{}); err != nil {
+	if err := db.AutoMigrate(&user.User{}, &article.Article{}); err != nil {
 		panic("failed to migrate database: " + err.Error())
 	}
 
