@@ -3,15 +3,13 @@ package article
 import "time"
 
 type CreateArticleRequest struct {
-	Title    string `json:"title" binding:"required"`
-	Content  string `json:"content" binding:"required"`
-	AuthorID uint   `json:"author_id" binding:"required"`
+	Title   string `json:"title" binding:"required"`
+	Content string `json:"content" binding:"required"`
 }
 
 type UpdateArticleRequest struct {
-	Title    string `json:"title,omitempty"`
-	Content  string `json:"content,omitempty"`
-	AuthorID uint   `json:"author_id,omitempty"`
+	Title   string `json:"title,omitempty"`
+	Content string `json:"content,omitempty"`
 }
 
 type ArticleResponse struct {

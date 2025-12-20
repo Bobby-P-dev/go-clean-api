@@ -49,6 +49,10 @@ func main() {
 	userService := user.NewService(userRepo)
 	userHandler := user.NewHandler(userService)
 
+	articleRepo := article.NewRepository(db)
+	articleService := article.NewService(articleRepo)
+	articleHandler := article.NewHandler(articleService)
+
 	r := gin.Default()
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -58,6 +62,12 @@ func main() {
 		api.POST("/users", userHandler.CreateUser)
 		api.GET("/users", userHandler.ListUsers)
 		api.POST("/login", userHandler.LoginUser)
+	}
+
+	articleGroup := r.Group("/article")
+	articleGroup.Use(user.AuthMiddleware())
+	{
+		articleGroup.POST("/create", articleHandler.CreateArticle)
 	}
 
 	protected := r.Group("/protected/api/v1")
